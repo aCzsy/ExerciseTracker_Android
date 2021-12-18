@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
+    android:id="@+id/linear_layout"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -14,10 +15,27 @@
         android:gravity="center"
         android:orientation="vertical">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/latitude"
+            android:text="Latitude: N/A"
+            android:textSize="20sp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/longitude"
+            android:text="Longitude: N/A"
+            android:textSize="20sp"
+            />
+
+
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="00:00"
+        android:text="00:00:00"
         android:textSize="50dp"
         android:textStyle="bold"
         android:gravity="center"
@@ -30,6 +48,29 @@
         android:text="START TRACKING"
         android:textSize="20dp"
         android:layout_marginTop="10dp"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/exercise_stop_btn"
+            android:text="STOP TRACKING"
+            android:textSize="20dp"
+            android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/gps"
+            android:text="TEST"
+            android:textSize="20sp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/distance"
+            android:text="DISTANCE"
+            android:textSize="20sp"
+            />
 
     </LinearLayout>
 
