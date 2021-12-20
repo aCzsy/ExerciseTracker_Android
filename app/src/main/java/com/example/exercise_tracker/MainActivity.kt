@@ -1,6 +1,7 @@
 package com.example.exercise_tracker
 
 import android.Manifest
+import android.Manifest.permission
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
@@ -28,6 +29,10 @@ import android.os.Environment
 import android.os.Build
 import android.content.ContentUris
 import android.database.Cursor
+import org.w3c.dom.*
+
+import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +44,8 @@ class MainActivity : AppCompatActivity() {
     private var _start_btn:Button? = null
     private var _stop_btn:Button? = null
     private var _t:TextView? = null
+    var _gps:TextView? = null
+    var _speed:TextView? = null
 
     private lateinit var _latitude: TextView
     private lateinit var _longitude: TextView
@@ -55,6 +62,17 @@ class MainActivity : AppCompatActivity() {
     var otStream:OutputStream? = null
     var _fileName = ""
     var iStream:InputStream? = null
+    var points:ArrayList<String>? = null
+
+    var speeds:ArrayList<Double> = ArrayList()
+    var altitudes:ArrayList<Double> = ArrayList()
+    var minAltitude:Double = 0.0
+    var maxAltitude:Double = 0.0
+    var avg_speed:Double = 0.0
+
+    var totalDistance:Float = 0F
+
+    var permissionsGranted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +84,7 @@ class MainActivity : AppCompatActivity() {
         }
         runTimer()
 
+
         // get access to all of the views in our UI
         _latitude = findViewById<TextView>(R.id.latitude)
         _longitude = findViewById<TextView>(R.id.longitude)
@@ -75,6 +94,10 @@ class MainActivity : AppCompatActivity() {
         // get access to the location manager
         _lm = getSystemService(LOCATION_SERVICE) as LocationManager
         timer = findViewById(R.id.exercise_timer)
+        _gps = findViewById(R.id.gps)
+        _speed = findViewById(R.id.speed)
+
+        points = ArrayList()
 
         supportActionBar?.hide()
 
@@ -85,7 +108,7 @@ class MainActivity : AppCompatActivity() {
 
         _start_btn?.setOnClickListener(object : View.OnClickListener{
             override fun onClick(p0: View?) {
-                addLocationListener()
+                storageAndLocationPermissions()
                 startTimer()
             }
         })
@@ -98,7 +121,8 @@ class MainActivity : AppCompatActivity() {
                 } catch (e:IOException){
                     e.printStackTrace()
                 }
-                readGPXfile()
+                //readGPXfile()
+                parseGPXfile()
                 stopTimer()
                 startStatsActivity()
             }
@@ -159,6 +183,21 @@ class MainActivity : AppCompatActivity() {
     fun startStatsActivity() {
         val _intent = Intent(this, StatsActivity::class.java).apply {
             putExtra("TIME",timer?.text)
+            putExtra("DISTANCE",totalDistance)
+            if(!altitudes.isEmpty()){
+                minAltitude = Collections.min(altitudes)
+                maxAltitude = Collections.max(altitudes)
+                putExtra("MIN_ALTITUDE",minAltitude)
+                putExtra("MAX_ALTITUDE",maxAltitude)
+            }
+            if(!speeds.isEmpty()){
+                var s = 0.0
+                for(i in speeds){
+                    s += i
+                }
+                avg_speed = s/speeds.size
+                putExtra("AVG_SPEED",avg_speed)
+            }
         }
         startActivity(_intent)
     }
@@ -167,36 +206,62 @@ class MainActivity : AppCompatActivity() {
         timer?.setText(time)
     }
 
+    private fun externalStoragePermission(){
+        if(ActivityCompat.checkSelfPermission(this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+        {
+            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE),1)
+        }
+        return
+    }
+
     // private function that will add a location listener that will update every 5 seconds
-    private fun addLocationListener() {
+    private fun storageAndLocationPermissions() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED))
         {
             // we will request the permissions for the fine and coarse location. like
             //setOnActivityResult we have to add a request code
                     // here as in larger applications there may be multiple permission requests to deal with.
                     requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION), 1)
+                        Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE), 1)
             // return after the call to request permissions as we don't know if the user has allowed it
             return
         }
         _lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0f, object :
             LocationListener {
+            @SuppressLint("SetTextI18n")
             override fun onLocationChanged(p0: Location) {
+                Log.wtf("ALTITUDFE",p0.altitude.toString())
+
+                if(p0.altitude > 0.0) altitudes.add(p0.altitude)
+
+                //millis to seconds
+                if(p0.speed > 0f) speeds.add((p0.speed.toDouble())/1000)
+
+                val txtViewAltitude = p0.hasAltitude().toString() + ", " + p0.altitude.toString()
+                val txtViewSpeed = p0.speed.toString()
+                _gps?.text = txtViewAltitude
+                _speed?.text = txtViewSpeed
 
                 if(timerRunning){
                     Log.wtf("LAT",p0.latitude.toString())
                     Log.wtf("LAT",p0.longitude.toString())
 
-                    var trackPoint = "<trkpt lat=\"" + p0.latitude + "\" lon=\"" + p0.longitude + "\"><time>" + time + "</time></trkpt>\n";
+                    var trackPoint = "<trkpt lat=\"" + p0.latitude + "\" lon=\"" + p0.longitude + "\"/>\n";
                     otStream?.write(trackPoint.toByteArray())
                 }
 
                 // update the textviews with the current location
-//                _latitude.setText("Latitude: " + p0.latitude)
-//                _longitude.setText("Longitude: " + p0.longitude)
+                _latitude.text = "Latitude: " + p0.latitude
+                _longitude.text = "Longitude: " + p0.longitude
             }
         })
     }
@@ -210,12 +275,18 @@ class MainActivity : AppCompatActivity() {
             // if we have been denied permissions then throw a snack bar message indicating that
             //we need them
             if(grantResults[0] == PackageManager.PERMISSION_DENIED || grantResults[1] ==
+                PackageManager.PERMISSION_DENIED || grantResults[2] == PackageManager.PERMISSION_DENIED || grantResults[3] ==
                 PackageManager.PERMISSION_DENIED) {
-                var snackbar: Snackbar = Snackbar.make(_linear_layout, "App will not work without location permissions", Snackbar.LENGTH_LONG)
+                var snackbar: Snackbar = Snackbar.make(_linear_layout, "Permissions must be granted for this application", Snackbar.LENGTH_LONG)
                         snackbar.show()
-            } else {
-                var snackbar: Snackbar = Snackbar.make(_linear_layout, "location permissions granted", Snackbar.LENGTH_LONG)
-                        snackbar.show()
+
+                requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+
+            } else if(grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] ==
+                PackageManager.PERMISSION_GRANTED || grantResults[2] == PackageManager.PERMISSION_GRANTED || grantResults[3] == PackageManager.PERMISSION_GRANTED){
+                var snackbar: Snackbar = Snackbar.make(_linear_layout, "Storage and Location permissions granted", Snackbar.LENGTH_LONG)
+                snackbar.show()
             }
         }
     }
@@ -251,6 +322,7 @@ class MainActivity : AppCompatActivity() {
                 MediaStore.Files.getContentUri("external"),
                 values
             ) //creating uri path
+
             val outputStream = contentResolver.openOutputStream(uri!!)
             outputStream!!.write(xmlHeader.toByteArray())
             outputStream.write(gpxTitle.toByteArray())
@@ -267,7 +339,9 @@ class MainActivity : AppCompatActivity() {
 
 
     @SuppressLint("Range")
-    fun readGPXfile(){
+    fun readGPXfile():InputStream?{
+        var s = ""
+
         val contentUri = MediaStore.Files.getContentUri("external")
         val selection = MediaStore.MediaColumns.RELATIVE_PATH + "=?"
         val selectionArgs = arrayOf(Environment.DIRECTORY_DOCUMENTS + "/GPStracks/")
@@ -297,6 +371,7 @@ class MainActivity : AppCompatActivity() {
                                 val id: Long =
                                     cursor.getLong(cursor.getColumnIndex(MediaStore.MediaColumns._ID))
                                 uri = ContentUris.withAppendedId(contentUri, id)
+                                Log.wtf("CONTENTURI",contentUri.toString())
                                 break
                             }
                         }
@@ -312,20 +387,101 @@ class MainActivity : AppCompatActivity() {
                         val inputStream = contentResolver.openInputStream(uri)
                         val size = inputStream!!.available()
                         val bytes = ByteArray(size)
-                        val r = BufferedReader(InputStreamReader(inputStream))
 
-                        var mLine: String?
-                        while (r.readLine().also { mLine = it } != null) {
-                            Log.i("STREAM",mLine.toString())
-                            Log.i("STREAM","\n")
-                        }
-                        inputStream.read(bytes)
-                        inputStream.close()
+//                        val r = BufferedReader(InputStreamReader(inputStream))
+//
+//                        var mLine: String?
+//                        while (r.readLine().also { mLine = it } != null) {
+//                            Log.i("STREAM",mLine.toString())
+//                            Log.i("STREAM","\n")
+//                        }
+
+                        //inputStream.read(bytes)
+
+                        return inputStream
+                        //inputStream.close()
                     } catch (e: IOException) {
                         Toast.makeText(applicationContext, "Fail to read file", Toast.LENGTH_SHORT)
                             .show()
                     }
                 }
+            }
+        }
+        return null
+    }
+
+
+    fun parseGPXfile(){
+        var distance = 0f
+        iStream = readGPXfile()
+        val dbf = DocumentBuilderFactory.newInstance()
+        dbf.isNamespaceAware = false
+        val doc: Document = dbf.newDocumentBuilder().parse(iStream)
+        doc.documentElement.normalize()
+
+        val locA:Location? = Location("Location A")
+        val locB:Location? = Location("Location B")
+
+        var list: NodeList = doc.getElementsByTagName("trkpt")
+        Log.wtf("NODELIST SIZE",list.length.toString())
+
+        for (temp in 0 until list.length) {
+            var node: Node = list.item(temp)
+            var nextNode:Node? = list.item(temp+1)
+            var element2: Element? = null
+            if (node.nodeType == Node.ELEMENT_NODE) {
+                var element: Element = node as Element
+                if(nextNode != null){
+                    element2 = nextNode as Element
+                }
+                Log.wtf("TAGNAME",element.tagName)
+
+                var lat = element.getAttribute("lat")
+                var lon = element.getAttribute("lon")
+                locA?.latitude = lat.toDouble()
+                locA?.longitude = lon.toDouble()
+
+                if (locA != null) {
+                    Log.wtf("LOCA LAT",locA.latitude.toString())
+                }
+                if (locA != null) {
+                    Log.wtf("LOCA LON",locA.longitude.toString())
+                }
+
+                var lat2 = element2?.getAttribute("lat")
+                var lon2 = element2?.getAttribute("lon")
+                if (lat2 != null) {
+                    locB?.latitude = lat2.toDouble()
+                }
+                if (lon2 != null) {
+                    locB?.longitude = lon2.toDouble()
+                }
+                if (locB != null) {
+                    Log.wtf("LOCB LAT",locB.latitude.toString())
+                }
+                if (locB != null) {
+                    Log.wtf("LOCB LON",locB.longitude.toString())
+                }
+
+                if(locB != null){
+                    distance += locA?.distanceTo(locB)!!
+
+                    val formattedDistCounter = String.format("%.2f",distance)
+                    Log.wtf("DISTANCE",formattedDistCounter)
+
+                }
+
+                totalDistance = distance
+
+//                Log.wtf("CURRENT ELEMENT",node.nodeName)
+                Log.wtf("lat",lat)
+                Log.wtf("lon",lon)
+
+                Log.wtf("lat2",lat2)
+                Log.wtf("lon2",lon2)
+
+//                var formattedDistCounter = String.format("%.2f",totalDistance)
+//                Log.wtf("DISTANCE",formattedDistCounter)
             }
         }
     }

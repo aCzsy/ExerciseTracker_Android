@@ -3,6 +3,7 @@ package com.example.exercise_tracker
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
+import android.os.Parcelable
 import android.os.PersistableBundle
 import android.util.Log
 import android.widget.TextView
@@ -38,6 +39,12 @@ class StatsActivity : AppCompatActivity() {
 
 
         val received_time:String = intent.getStringExtra("TIME") as String
+        val received_distance:Float = intent.getFloatExtra("DISTANCE",0f) as Float
+        val received_min_altidude:Double = intent.getDoubleExtra("MIN_ALTITUDE",0.0)
+        val received_max_altitude:Double = intent.getDoubleExtra("MAX_ALTITUDE",0.0)
+        val received_avg_speed:Double = intent.getDoubleExtra("AVG_SPEED",0.0)
+        //val received_points:ArrayList<String> = intent.getStringArrayListExtra("POINTS") as ArrayList<String>
+
         Log.wtf("TIME RECEIVED",received_time)
 
         val time:ArrayList<String> = received_time.split(":") as ArrayList<String>
@@ -45,92 +52,19 @@ class StatsActivity : AppCompatActivity() {
         val mn = time.get(1) + " min"
         val sec = time.get(2) + " sec"
 
-        _time_taken?.setText(hr + " " + mn + " " + sec)
+        val min_alt = "Min altitude: $received_min_altidude"
+        val max_alt = "Max altitude: $received_max_altitude"
 
+        val formattedDistCounter = String.format("%.2f",received_distance)
+        val formattedAvgSpeed = String.format("%.2f",received_avg_speed)
 
-        var i = 0
-        var nextPoint = 1
-        var altitudes:ArrayList<Double> = ArrayList()
-        var speeds:ArrayList<Float> = ArrayList()
-        var average_speed:Float = 0f
+        val avg_speed = "Average speed: $formattedAvgSpeed m/s"
 
-//        if(read_file.size >= 2){
-//            while(nextPoint <= read_file.size-1){
-//                val startPoint = Location("locationA")
-//                val endPoint = Location("locationB")
-//                var distanceCounter = 0.0
-//                Log.wtf("I",i.toString())
-//                Log.wtf("NEXTPOINT",nextPoint.toString())
-//
-//                startPoint.latitude = read_file.get(i).split(" ").get(0).toDouble()
-//                startPoint.longitude = read_file.get(i).split(" ").get(1).toDouble()
-//                endPoint.latitude = read_file.get(nextPoint).split(" ").get(0).toDouble()
-//                endPoint.longitude = read_file.get(nextPoint).split(" ").get(1).toDouble()
-//
-//                distanceCounter += startPoint.distanceTo(endPoint)
-//
-//
-//                speeds.add(startPoint.speed)
-//                speeds.add(endPoint.speed)
-//
-//                //storing altitudes of each point
-//                altitudes.add(startPoint.altitude)
-//                altitudes.add(endPoint.altitude)
-//
-////                distanceCounter += startPoint.distanceTo(endPoint)
-////                Log.wtf("ALTITUDE A",startPoint.altitude.toString())
-////                Log.wtf("ALTITUDE B",endPoint.altitude.toString())
-//                //Log.wtf("DISTANCE",distanceCounter.toString())
-//                var formattedDistCounter = String.format("%.2f",distanceCounter)
-//                _tot_distance?.setText("Total distance: " + formattedDistCounter + " metres")
-//
-//                i++
-//                nextPoint++
-//            }
-//        }
-//
-//        var spd = 0f
-//        for(i in speeds){
-//            spd += i
-//        }
-//        average_speed = spd/speeds.size
-//
-//        _avg_speed?.setText("Average speed: " + average_speed.toString() + " m/s")
-//
-//
-//        _min_altitude?.setText("Min altitude: " + Collections.min(altitudes).toString())
-//        _max_altitude?.setText("Max altitude: " + Collections.max(altitudes).toString())
+        _time_taken?.setText("$hr $mn $sec")
+        _tot_distance?.setText("Total distance: $formattedDistCounter metres")
+        _min_altitude?.text = min_alt
+        _max_altitude?.text = max_alt
+        _avg_speed?.text = avg_speed
 
     }
-
-//    fun readGPXfile(_file:File):ArrayList<String>{
-//        var arr:ArrayList<String> = ArrayList()
-//
-//        // we will now read back in the file
-//        var total: String = ""
-//        try {
-//            val br: BufferedReader = BufferedReader(FileReader(_file))
-//            var temp: String? = br.readLine()
-//            while(temp != null) {
-//                total += temp + "\n"
-//                arr.add(temp)
-//                temp = br.readLine()
-//            }
-//            br.close()
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//        }
-//        // set the file content on the textview then delete the file
-//        _fileTW?.setText(total)
-//
-//        return arr
-//    }
-
-//    private fun calculateDistanceBetweenCoordinates(locA:Location, _locALat: Double, _locALong: Double, locB:Location, _locBLat: Double, _locBLong: Double,_counter:Double){
-//        locA.latitude = _locALat
-//        locA.longitude = _locALong
-//        locB.latitude = _locBLat
-//        locB.longitude = _locBLong
-//        _counter += locA.distanceTo(locB)
-//    }
 }
