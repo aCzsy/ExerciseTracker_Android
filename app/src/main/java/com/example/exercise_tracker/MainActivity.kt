@@ -1,7 +1,6 @@
 package com.example.exercise_tracker
 
 import android.Manifest
-import android.Manifest.permission
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
@@ -184,13 +183,13 @@ class MainActivity : AppCompatActivity() {
         val _intent = Intent(this, StatsActivity::class.java).apply {
             putExtra("TIME",timer?.text)
             putExtra("DISTANCE",totalDistance)
-            if(!altitudes.isEmpty()){
+            if(altitudes.isNotEmpty()){
                 minAltitude = Collections.min(altitudes)
                 maxAltitude = Collections.max(altitudes)
                 putExtra("MIN_ALTITUDE",minAltitude)
                 putExtra("MAX_ALTITUDE",maxAltitude)
             }
-            if(!speeds.isEmpty()){
+            if(speeds.isNotEmpty()){
                 var s = 0.0
                 for(i in speeds){
                     s += i
@@ -204,17 +203,6 @@ class MainActivity : AppCompatActivity() {
 
     fun updateTimerView(time:String){
         timer?.setText(time)
-    }
-
-    private fun externalStoragePermission(){
-        if(ActivityCompat.checkSelfPermission(this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-        {
-            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE),1)
-        }
-        return
     }
 
     // private function that will add a location listener that will update every 5 seconds
@@ -244,10 +232,10 @@ class MainActivity : AppCompatActivity() {
                 if(p0.altitude > 0.0) altitudes.add(p0.altitude)
 
                 //millis to seconds
-                if(p0.speed > 0f) speeds.add((p0.speed.toDouble())/1000)
+                if(p0.speed > 0f) speeds.add(p0.speed.toDouble())
 
                 val txtViewAltitude = p0.hasAltitude().toString() + ", " + p0.altitude.toString()
-                val txtViewSpeed = p0.speed.toString()
+                val txtViewSpeed =  String.format("%.2f",p0.speed) + " m/s"
                 _gps?.text = txtViewAltitude
                 _speed?.text = txtViewSpeed
 

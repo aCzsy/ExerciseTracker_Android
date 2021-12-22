@@ -65,6 +65,5 @@ class StatsActivity : AppCompatActivity() {
         _min_altitude?.text = min_alt
         _max_altitude?.text = max_alt
         _avg_speed?.text = avg_speed
-
     }
 }
