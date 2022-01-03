@@ -36,10 +36,6 @@ import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
-    private var alt:TextView? = null
-    private var spd:TextView? = null
-    private var lat:TextView? = null
-    private var lon:TextView? = null
 
     //Declaring required variables
     //variables required for stopwatch timer
@@ -85,12 +81,6 @@ class MainActivity : AppCompatActivity() {
 
         //hiding action bar
         supportActionBar?.hide()
-
-        alt = findViewById(R.id.alt)
-        spd = findViewById(R.id.spd)
-        lat = findViewById(R.id.ltd)
-        lon = findViewById(R.id.lon)
-
 
         // get access to all of the views in our UI
         _linear_layout = findViewById<LinearLayout>(R.id.linear_layout)
@@ -325,24 +315,14 @@ class MainActivity : AppCompatActivity() {
             LocationListener {
             @SuppressLint("SetTextI18n")
             override fun onLocationChanged(p0: Location) {
-                Log.wtf("ALTITUDFE",p0.altitude.toString())
-                alt?.setText("Altitude: " + p0.altitude)
-                spd?.setText("Speed: " + p0.speed)
-                lat?.setText("Latitude: " + p0.latitude)
-                lon?.setText("Longitude: " + p0.longitude)
-
-                //only adding values that are greater than 0.0
-                if(p0.altitude > 0.0) altitudes.add(p0.altitude)
-
-                //only adding values that are greater than 0.0
-                if(p0.speed > 0f) speeds.add(p0.speed.toDouble())
-
                 //only recording data when timer is running
                 if(timerRunning){
-                    Log.wtf("LAT",p0.latitude.toString())
-                    Log.wtf("LAT",p0.longitude.toString())
-
+                    altitudes.add(p0.altitude)
+                    speeds.add(p0.speed.toDouble())
+                    //recording latitude and longitude of a gps position and wrapping them in a <trkpt> tag so
+                    //it gets saved as GPX tracking point
                     var trackPoint = "<trkpt lat=\"" + p0.latitude + "\" lon=\"" + p0.longitude + "\"/>\n";
+                    //writing results
                     otStream?.write(trackPoint.toByteArray())
                 }
             }
@@ -429,11 +409,11 @@ class MainActivity : AppCompatActivity() {
             outputStream!!.write(xmlHeader.toByteArray())
             outputStream.write(gpxTitle.toByteArray())
             //outputStream.close()
-            Toast.makeText(applicationContext, "File created successfully", Toast.LENGTH_SHORT)
+            Toast.makeText(applicationContext, "GPX file created", Toast.LENGTH_SHORT)
                 .show()
             return outputStream
         } catch (e: IOException) {
-            Toast.makeText(applicationContext, "Fail to create file", Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext, "Error while creating file", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         }
         return null

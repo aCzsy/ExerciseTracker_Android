@@ -10,42 +10,6 @@
     android:background="@color/bgcolor"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Latitude"
-        android:textColor="@color/text"
-        android:id="@+id/alt"
-        android:textSize="20dp"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spd"
-        android:text="Speed"
-        android:textColor="@color/text"
-        android:textSize="20dp"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ltd"
-        android:text="Latitude"
-        android:textColor="@color/text"
-        android:textSize="20dp"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/lon"
-        android:text="Longitude"
-        android:textColor="@color/text"
-        android:textSize="20dp"
-        />
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
