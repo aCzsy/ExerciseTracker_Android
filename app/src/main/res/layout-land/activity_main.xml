@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
+    android:id="@+id/linear_layout"
+    android:background="@color/bgcolor"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -14,27 +16,32 @@
         android:gravity="center"
         android:orientation="vertical">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="00:00:00"
-        android:textSize="50dp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:id="@+id/exercise_timer"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="00:00:00"
+            android:textSize="50dp"
+            android:textStyle="bold"
+            android:textColor="@color/timer"
+            android:gravity="center"
+            android:id="@+id/exercise_timer"/>
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/exercise_start_btn"
-        android:text="START TRACKING"
-        android:textSize="20dp"
-        android:layout_marginTop="10dp"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/exercise_start_btn"
+            android:backgroundTint="@color/main"
+            android:textColor="@color/btntextcolor"
+            android:text="START TRACKING"
+            android:textSize="20dp"
+            android:layout_marginTop="10dp"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/exercise_stop_btn"
+            android:backgroundTint="@color/main"
+            android:textColor="@color/btntextcolor"
             android:text="STOP TRACKING"
             android:textSize="20dp"
             android:layout_marginTop="10dp"/>

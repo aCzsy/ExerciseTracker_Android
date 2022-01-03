@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Exercise_Tracker</string>
+    <string name="y_axis_speed_in_km_h">y axis: speed in km/h</string>
+    <string name="x_axis_distance_in_km">x axis: distance in km</string>
 </resources>

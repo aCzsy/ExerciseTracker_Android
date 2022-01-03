@@ -8,4 +8,12 @@
     <color name="teal_800">#00665a</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="bgcolor">#161b1d</color>
+    <color name="timer">#cccccc</color>
+    <color name="main">#f5d13a</color>
+    <color name="main2">#c29d0a</color>
+    <color name="btntextcolor">#493b04</color>
+    <color name="text">#a8b7bd</color>
+    <color name="statsbg">#21292c</color>
+    <color name="graph_txt_color">#aa8909</color>
 </resources>
