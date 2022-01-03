@@ -87,7 +87,7 @@ class StatsActivity : AppCompatActivity() {
             }
         })
 
-        //Splitting 00:00:00 received time format into separate parts and storing them
+        //Splitting 00:00:00 received time format into separate parts and storing them in ArrayList
         val time:ArrayList<String> = received_time!!.split(":") as ArrayList<String>
         val hr = time.get(0) + " hr"
         val mn = time.get(1) + " min"

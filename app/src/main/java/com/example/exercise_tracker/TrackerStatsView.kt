@@ -86,7 +86,7 @@ class TrackerStatsView(context: Context?, attrs: AttributeSet?) : View(context, 
     }
 
     /**
-     *This method initializes a grid which represents a graph paper
+     *This method initializes a 2D grid which represents a graph paper
      * Graph grid is 12x12, but only 10x10 are used for drawing points on
      * Other cells are used for displaying metrics text
      */
@@ -141,7 +141,6 @@ class TrackerStatsView(context: Context?, attrs: AttributeSet?) : View(context, 
         //DecimalFormat object is used to format distance values to 2 decimal points
         val df = DecimalFormat("0.00")
         var centerToWall = (width/12)/2 //Distance from cell's wall to the center (or center to the wall)
-        //Log.wtf("DISTANCES",distances.size.toString())
         //Looping through the length of a grid
         for (i in 0 until graphGrid.size-1) {
             //And displaying speed units on the y axis from 10 to 0

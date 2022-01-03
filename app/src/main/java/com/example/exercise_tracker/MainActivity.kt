@@ -58,7 +58,6 @@ class MainActivity : AppCompatActivity() {
     var otStream:OutputStream? = null //tracking data outputstream
     var _fileName = "" //used when reading data from created file
     var iStream:InputStream? = null //data reading inputstream
-    //var points:ArrayList<String>? = null //
     var speeds:ArrayList<Double> = ArrayList() //speeds at each gps reading
     var altitudes:ArrayList<Double> = ArrayList() //altitudes at each gps reading
     var minAltitude:Double = 0.0 //minimum altitude recorded
@@ -89,8 +88,6 @@ class MainActivity : AppCompatActivity() {
 
         //stopwatch timer view
         timer = findViewById(R.id.exercise_timer)
-
-        //points = ArrayList()
 
         //start, stop  buttons
         _start_btn = findViewById(R.id.exercise_start_btn)
@@ -183,25 +180,26 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * This method is executed when UI is partially visible to the user
+     * Timer is stopped by changing the flag to false
      */
     override fun onPause() {
         super.onPause()
-        //timer is stopped
         timerWasRunning = timerRunning
         timerRunning = false
     }
 
     /**
      * This method is executed if the activity is resumed
+     * Timer continues by changing the flag back to true
      */
     override fun onResume() {
         super.onResume()
-        //timer continues
         if(timerWasRunning) timerRunning = true
     }
 
     /**
      * This method is executed when timer starts
+     * Timer starts when flag is set to true
      */
     fun startTimer(){
         timerRunning = true
@@ -209,6 +207,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * This method is executed when timer stops
+     * Timer stops by changing the flag to false
      */
     fun stopTimer(){
         timerRunning = false
@@ -246,7 +245,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * This method gets executed when stop button is clicked
-     * This method redirects to another activity and passes variables to that activity
+     * This method redirects to another activity and passes statistical variables to that activity
      */
     fun startStatsActivity() {
         //All tracking statistics details that will be passed to the next activity
@@ -254,7 +253,8 @@ class MainActivity : AppCompatActivity() {
             putExtra("TIME",timer?.text)
             putExtra("DISTANCE",totalDistance)
             if(altitudes.isNotEmpty()){
-                //calculating min and max altitudes
+                //Min and Max altitudes are calculated by using Collections.min and Collections.max static methods
+                //on altitudes ArrayList which contains all gps tracked altitudes
                 minAltitude = Collections.min(altitudes)
                 maxAltitude = Collections.max(altitudes)
                 putExtra("MIN_ALTITUDE",minAltitude)
@@ -269,8 +269,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 avg_speed = s/speeds.size
             }
-            //else average speed is set to 0.0
-            //and speeds will only contain 0.0 value which means there was no movement
+            //if speeds ArrayList is empty, average speed is set to 0.0
+            //and speeds ArrayList will only contain one 0.0 value which means there was no movement
             else{
                 avg_speed = 0.0
                 speeds = arrayListOf(0.0)
@@ -289,7 +289,9 @@ class MainActivity : AppCompatActivity() {
         startActivity(_intent)
     }
 
-    //updating timer UI
+    /**
+     * updating timer UI
+     */
     fun updateTimerView(time:String){
         timer?.setText(time)
     }
